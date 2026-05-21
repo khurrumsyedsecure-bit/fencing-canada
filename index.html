@@ -860,7 +860,7 @@ section{padding:100px 0;position:relative}
           </li>
           <li>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <div><strong>hello@fencingcanada.ca</strong><span>Replies within 2 business hours</span></div>
+            <div><strong><a href="mailto:fencingcanada1@gmail.com">fencingcanada1@gmail.com</a></strong><span>Replies within 2 business hours</span></div>
           </li>
           <li>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -874,27 +874,33 @@ section{padding:100px 0;position:relative}
           <a href="#" class="social" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg></a>
         </div>
       </div>
-      <form class="contact-form reveal" id="contactForm" novalidate>
+      <form class="contact-form reveal" id="contactForm" action="https://formsubmit.co/fencingcanada1@gmail.com" method="POST" novalidate>
+        <!-- Formsubmit.co configuration: routes submissions to fencingcanada1@gmail.com -->
+        <input type="hidden" name="_subject" value="New inquiry from Fencing Canada website">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+
         <div class="form-row">
-          <div class="form-group"><label for="fName">Name</label><input type="text" id="fName" required></div>
-          <div class="form-group"><label for="fPhone">Phone</label><input type="tel" id="fPhone" required></div>
+          <div class="form-group"><label for="fName">Name</label><input type="text" id="fName" name="Name" required></div>
+          <div class="form-group"><label for="fPhone">Phone</label><input type="tel" id="fPhone" name="Phone" required></div>
         </div>
-        <div class="form-group"><label for="fEmail">Email</label><input type="email" id="fEmail" required></div>
+        <div class="form-group"><label for="fEmail">Email</label><input type="email" id="fEmail" name="Email" required></div>
         <div class="form-row">
           <div class="form-group">
             <label for="fType">Fence Type</label>
-            <select id="fType"><option>Cedar Wood</option><option>Vinyl</option><option>Chain-Link</option><option>Wrought Iron</option><option>Composite</option><option>Not sure yet</option></select>
+            <select id="fType" name="Fence Type"><option>Cedar Wood</option><option>Vinyl</option><option>Chain-Link</option><option>Wrought Iron</option><option>Composite</option><option>Not sure yet</option></select>
           </div>
           <div class="form-group">
             <label for="fProv">Province</label>
-            <select id="fProv"><option>Ontario</option><option>British Columbia</option><option>Alberta</option><option>Quebec</option><option>Manitoba</option><option>Saskatchewan</option><option>Nova Scotia</option><option>New Brunswick</option><option>PEI</option><option>Newfoundland</option></select>
+            <select id="fProv" name="Province"><option>Ontario</option><option>British Columbia</option><option>Alberta</option><option>Quebec</option><option>Manitoba</option><option>Saskatchewan</option><option>Nova Scotia</option><option>New Brunswick</option><option>PEI</option><option>Newfoundland</option></select>
           </div>
         </div>
-        <div class="form-group"><label for="fMsg">Project Details</label><textarea id="fMsg" placeholder="Approximate length, gates, any obstacles..."></textarea></div>
+        <div class="form-group"><label for="fMsg">Project Details</label><textarea id="fMsg" name="Project Details" placeholder="Approximate length, gates, any obstacles..."></textarea></div>
         <button type="submit" class="btn btn-primary form-submit">Send Inquiry
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
         </button>
-        <div class="form-msg" id="formMsg">Thanks! A specialist will contact you within 2 business hours.</div>
+        <div class="form-msg" id="formMsg">Thanks! Your message was sent — we'll reply within 2 business hours.</div>
       </form>
     </div>
   </div>
@@ -1247,10 +1253,12 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 
-/* ========= Contact form ========= */
-document.getElementById('contactForm').addEventListener('submit', (e) => {
+/* ========= Contact form (Formsubmit.co AJAX → fencingcanada1@gmail.com) ========= */
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target;
+  const msg = document.getElementById('formMsg');
+  const btn = f.querySelector('button[type=submit]');
   let ok = true;
   ['fName', 'fPhone', 'fEmail'].forEach(id => {
     const el = document.getElementById(id);
@@ -1258,9 +1266,36 @@ document.getElementById('contactForm').addEventListener('submit', (e) => {
     else el.style.borderColor = '';
   });
   if (!ok) return;
-  document.getElementById('formMsg').classList.add('show');
-  setTimeout(() => f.reset(), 200);
-  setTimeout(() => document.getElementById('formMsg').classList.remove('show'), 5000);
+  const origBtn = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Sending...';
+  msg.classList.remove('show');
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/fencingcanada1@gmail.com', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(f)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && (data.success === 'true' || data.success === true)) {
+      msg.textContent = "Thanks! Your message was sent — we'll reply within 2 business hours.";
+      msg.style.background = '#e6f4ea';
+      msg.style.color = '#137333';
+      msg.classList.add('show');
+      f.reset();
+      setTimeout(() => msg.classList.remove('show'), 8000);
+    } else {
+      throw new Error(data.message || 'Send failed');
+    }
+  } catch (err) {
+    msg.textContent = 'Sorry, sending failed. Please call (437) 421-8757 or email fencingcanada1@gmail.com directly.';
+    msg.style.background = '#fde8e8';
+    msg.style.color = '#a82424';
+    msg.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origBtn;
+  }
 });
 
 /* ========= Back to top ========= */
